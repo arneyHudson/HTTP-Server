@@ -76,123 +76,14 @@ def handle_request(request_socket):
     :param request_socket: socket representing TCP connection from the HTTP client_socket
     :return: None
     """
-    header = parse_header(request_socket)
-    valid_version = check_version(header['version'])
-
-
 
     pass  # Replace this line with your code
 
 
-def check_version(version):
-    return version == b'1.1'
+# ** Do not modify code below this line.  You should add additional helper methods above this line.
 
-
-def check_resource(resource):
-    return 200
-
-
-def parse_header(data_socket):
-    """
-    Parses the header from the socket
-    :param data_socket: socket where data is coming from
-    :return: dictionary full of header values
-    """
-    dictionary = read_first_line(data_socket)
-    header = read_header(data_socket, dictionary)
-    data_socket.recv(1)
-    return header
-
-
-def read_header(data_socket, header):
-    """
-    reads the body of the header
-    :param data_socket: socket where data is coming from
-    :param header: dictionary to store data
-    :return: dictionary full of header values
-    """
-    data = b''
-
-    # Stops when header is done
-    index = 0
-    while data != b'\x0d':
-
-        while data != b'\x0a':
-            # Stops when line is done
-            key = b''
-            value = b''
-            if index == 0:
-                data = data_socket.recv(1)
-            while data != b':':
-                # Get key
-                key += data
-                data = data_socket.recv(1)
-
-            # Read 20 in ascii (space)
-            data = data_socket.recv(1)
-
-            data = data_socket.recv(1)
-            while data != b'\x0d':
-                # Get key
-                value += data
-                data = data_socket.recv(1)
-
-            # Read 0f value to exit loop
-            data = data_socket.recv(1)
-            header[key] = value
-
-        index += 1
-        data = data_socket.recv(1)
-
-    return header
-
-
-def read_first_line(data_socket):
-    """
-    reads the first line of the header
-    :param data_socket: socket where data is coming from
-    :return: dictonary of first line content
-    """
-    line = dict()
-
-    typ = get_version(data_socket)
-    line['version'] = typ
-
-    # get status
-    data = data_socket.recv(1)
-    status = b''
-    while data != b'\x20':
-        status += data
-        data = data_socket.recv(1)
-    line['status'] = status
-
-    # get ok status
-    data = data_socket.recv(1)
-    ok = b''
-    while data != b'\x0d':
-        ok += data
-        data = data_socket.recv(1)
-    line['ok'] = ok
-
-    # read line feed
-    data_socket.recv(1)
-
-    return line
-
-
-def get_version(data_socket):
-    """
-    gets the http version of the request
-    :param data_socket: socket where data is coming from
-    :return: the version of http requested
-    """
-    typ = b''
-    data = data_socket.recv(1)
-    while data != b'\x20':
-        typ += data
-        data = data_socket.recv(1)
-    return typ
-
+# Utility functions
+# You may use these functions to simplify your code.
 
 
 def get_mime_type(file_path):
