@@ -1,20 +1,21 @@
 """
 - NOTE: REPLACE 'N' Below with your section, year, and lab number
-- CS2911 - 0NN
-- Fall 202N
-- Lab N
+- CS2911 - 011
+- Fall 2022
+- Lab 5 - HTTP Server
 - Names:
-  - 
-  - 
+  - Josh Sopa
+  - Hudson Arney
 
 An HTTP server
 
-Introduction: (Describe the lab in your own words)
+Introduction: (Describe the lab in your own words):
 
 
 
 
-Summary: (Summarize your experience with the lab, what you learned, what you liked,what you disliked, and any suggestions you have for improvement)
+Summary: (Summarize your experience with the lab, what you learned, what you liked,what you disliked,
+ and any suggestions you have for improvement):
 
 
 
@@ -79,6 +80,8 @@ def handle_request(request_socket):
     header = parse_header(request_socket)
     if check_version(header['version']) is False:
         print('fart')
+
+
 pass  # Replace this line with your code
 
 
@@ -192,10 +195,47 @@ def get_version(data_socket):
     return typ
 
 
+def send_response(resource, status_code, text_file, data_socket):
+    """
+
+    :param data_socket:
+    :param resource:
+    :param status_code:
+    :return:
+    """
+    create_status_line(status_code)
+    create_header(resource)
+    convert_file_to_bytes(text_file, resource)
+    data_socket.close()
+
+
+def create_status_line(status_code):
+    """
+    creates the status line that contains the http version and the status code
+    :param status_code: the status code for the given response
+    :return: the status line (first line)
+    """
+
+    # bytes for the HTTP Version
+    http_version = "HTTP/1.1".encode('utf-8')
+
+    # reason phrase which depends on the status code given
+    reason_phrase = ""
+    if status_code == 200:
+        reason_phrase = "OK"
+    elif status_code == 400:
+        reason_phrase = "Bad Request"
+    elif status_code == 404:
+        reason_phrase = "Not Found"
+
+    # returns the http version, followed by a space, followed by the status code given, followed by a space,
+    # finally followed by the reason phrase of the status code and a CRLF
+    return http_version + b'\x20' + status_code + b'\x20' + reason_phrase.encode('utf-8') + b'\x0d\x0a'
+
+
 def get_mime_type(file_path):
     """
-    Try to guess the MIME type of a file (resource), given its path (primarily its file extension)
-
+    Try to guess the MIME type of file (resource), given its path (primarily its file extension)
     :param file_path: string containing path to (resource) file, such as './abc.html'
     :return: If successful in guessing the MIME type, a string representing the content type, such as 'text/html'
              Otherwise, None
@@ -216,12 +256,35 @@ def get_file_size(file_path):
              Otherwise (no such file, or path is not a file), None
     :rtype: int or None
     """
-
     # Initially, assume file does not exist
     file_size = None
     if os.path.isfile(file_path):
         file_size = os.stat(file_path).st_size
     return file_size
+
+
+def create_header(resource):
+    create_date()
+    get_mime_type(resource)
+    get_file_size(resource)
+
+
+def create_date():
+    timestamp = datetime.datetime.utcnow()
+    timestring = timestamp.strftime('%a, %d %b %Y %H:%M:%S GMT')
+    return timestring
+
+
+def convert_file_to_bytes(file_path, message):
+    """
+
+    :param file_path:
+    :param message:
+    :return:
+    """
+    binary_file = open(file_path + '.bin', "wb")
+    binary_file.write(message.encode('utf-8'))
+    binary_file.close()
 
 
 main()
