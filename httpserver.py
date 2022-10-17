@@ -209,7 +209,7 @@ def get_request_type(data_socket):
     return typ
 
 
-def send_response(resource, status_code, text_file, data_socket):
+def send_response(resource, status_code, data_socket):
     """
 
     :param data_socket:
@@ -219,7 +219,7 @@ def send_response(resource, status_code, text_file, data_socket):
     """
     create_status_line(status_code)
     create_header(resource)
-    convert_file_to_bytes(text_file, resource)
+    convert_file_to_bytes(resource)
     data_socket.close()
 
 
@@ -289,16 +289,14 @@ def create_date():
     return timestring
 
 
-def convert_file_to_bytes(file_path, message):
+def convert_file_to_bytes(file_path):
     """
 
     :param file_path:
     :param message:
     :return:
     """
-    binary_file = open(file_path + '.bin', "wb")
-    binary_file.write(message.encode('utf-8'))
-    binary_file.close()
+    return file_path.encode('utf-8')
 
 
 main()
