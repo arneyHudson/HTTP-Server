@@ -78,19 +78,33 @@ def handle_request(request_socket):
     :return: None
     """
     header = parse_header(request_socket)
-    if check_version(header['version']) is False:
-        print('fart')
+    print(header)
+    valid_version = check_version(header['version'])
+    status_code = check_resource(header['resource'])
+    if valid_version:
+        send_response(header['resource'], status_code, header['resource'], request_socket)
+    else:
+        send_response(header['resource'], 400, header['resource'], request_socket)
+
 
 
 pass  # Replace this line with your code
 
 
 def check_version(version):
-    return version == b'1.1'
+    return version == b'HTTP/1.1'
 
 
-def check_resource(resource):
-    return 200
+def check_resource(header):
+    resources = [b'/', b'/index.html', b'/msoe.png'
+                 b'/styles.css']
+    if header in resources:
+        code = 200
+    else:
+        code = 404
+    return code
+
+
 
 
 def parse_header(data_socket):
@@ -156,16 +170,16 @@ def read_first_line(data_socket):
     """
     line = dict()
 
-    typ = get_version(data_socket)
-    line['version'] = typ
+    typ = get_request_type(data_socket)
+    line['type'] = typ
 
-    # get status
+    # get resource
     data = data_socket.recv(1)
-    status = b''
+    resource = b''
     while data != b'\x20':
-        status += data
+        resource += data
         data = data_socket.recv(1)
-    line['status'] = status
+    line['resource'] = resource
 
     # get ok status
     data = data_socket.recv(1)
@@ -173,7 +187,7 @@ def read_first_line(data_socket):
     while data != b'\x0d':
         ok += data
         data = data_socket.recv(1)
-    line['ok'] = ok
+    line['version'] = ok
 
     # read line feed
     data_socket.recv(1)
@@ -181,7 +195,7 @@ def read_first_line(data_socket):
     return line
 
 
-def get_version(data_socket):
+def get_request_type(data_socket):
     """
     gets the http version of the request
     :param data_socket: socket where data is coming from
