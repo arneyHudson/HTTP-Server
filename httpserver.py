@@ -163,7 +163,7 @@ def read_first_line(data_socket):
     """
     reads the first line of the header
     :param data_socket: socket where data is coming from
-    :return: dictonary of first line content
+    :return: dictionary of first line content
     """
     line = dict()
 
@@ -225,7 +225,8 @@ def send_response(resource, status_code, data_socket):
     body = create_status_line(status_code)
     body += create_header(file_path)
     body += convert_file_to_bytes(file_path)
-    data_socket.sendAll(body)
+    print(body)
+    data_socket.sendall(body)
     data_socket.close()
 
 
@@ -281,7 +282,7 @@ def get_file_size(file_path):
     file_size = None
     if os.path.isfile(file_path):
         file_size = os.stat(file_path).st_size
-    return file_size.to_bytes(get_file_size(file_path).bit_length(), 'big')
+    return file_size.to_bytes(2, 'big')
 
 
 def create_header(file_path):
