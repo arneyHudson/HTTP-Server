@@ -95,7 +95,7 @@ def check_version(version):
 
 
 def check_resource(header):
-    resources = [b'/', b'/index.html', b'/msoe.png'
+    resources = [b'/', b'/index.html', b'/msoe.png',
                                        b'/styles.css']
     if header in resources:
         code = 200
@@ -220,13 +220,13 @@ def send_response(resource, status_code, data_socket):
     elif resource == b'/msoe.png':
         file_path = './msoe.png'
     elif resource == b'/styles.css':
-        file_path = './style.css'
+        file_path = './styles.css'
 
-    body = create_status_line(status_code)
-    body += create_header(file_path)
-    body += convert_file_to_bytes(file_path)
-    print(body)
-    data_socket.sendall(body)
+    header = create_status_line(status_code)
+    header += create_header(file_path)
+    body = convert_file_to_bytes(file_path)
+    print(header+body)
+    data_socket.sendall(header + body)
     data_socket.close()
 
 
@@ -251,7 +251,7 @@ def create_status_line(status_code):
 
     # returns the http version, followed by a space, followed by the status code given, followed by a space,
     # finally followed by the reason phrase of the status code and a CRLF
-    return http_version + b'\x20' + status_code.to_bytes(status_code.bit_length(), 'big') \
+    return http_version + b'\x20' + str(status_code).encode() \
            + b'\x20' + reason_phrase.encode('utf-8') + b'\x0d\x0a'
 
 
@@ -266,7 +266,7 @@ def get_mime_type(file_path):
 
     mime_type_and_encoding = mimetypes.guess_type(file_path)
     mime_type = mime_type_and_encoding[0]
-    return mime_type.encode('utf-8')
+    return mime_type
 
 
 def get_file_size(file_path):
@@ -274,7 +274,7 @@ def get_file_size(file_path):
     Try to get the size of a file (resource) as number of bytes, given its path
 
     :param file_path: string containing path to (resource) file, such as './abc.html'
-    :return: If file_path designates a normal file, an integer value representing the the file size in bytes
+    :return: If file_path designates a normal file, an integer value representing the file size in bytes
              Otherwise (no such file, or path is not a file), None
     :rtype: int or None
     """
@@ -282,17 +282,21 @@ def get_file_size(file_path):
     file_size = None
     if os.path.isfile(file_path):
         file_size = os.stat(file_path).st_size
-    return file_size.to_bytes(2, 'big')
+    return file_size
 
 
 def create_header(file_path):
-    return create_date() + get_mime_type(file_path) + get_file_size(file_path)
+    return create_date() + b'\x0d\x0a' + \
+        'Connection: close'.encode() + b'\x0d\x0a' +\
+        'Content-Type: '.encode() + get_mime_type(file_path).encode() + b'\x0d\x0a' +\
+        'Content-Length: '.encode() + get_file_size(file_path).to_bytes(2, 'big') \
+        + b'\x0d\x0a\x0d\x0a'
 
 
 def create_date():
     timestamp = datetime.datetime.utcnow()
     timestring = timestamp.strftime('%a, %d %b %Y %H:%M:%S GMT')
-    return timestring.encode('utf-8')
+    return 'Date: '.encode('utf-8') + timestring.encode('utf-8')
 
 
 def convert_file_to_bytes(file_path):
@@ -302,8 +306,17 @@ def convert_file_to_bytes(file_path):
     :param message:
     :return:
     """
-    return file_path.encode('utf-8')
 
+    with open(os.path.join(file_path), 'rb') as fobj:
+        raw_bytes = fobj.read()
+        print(raw_bytes)
+    return raw_bytes
+
+    file = open(os.path.join(file_path), 'rb')
+    key_value = file.encode()
+    print(key_value)
+    key_value += b'\x0d\x0a'
+    return key_value
 
 main()
 
