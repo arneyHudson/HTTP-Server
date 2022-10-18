@@ -215,11 +215,11 @@ def send_response(resource, status_code, data_socket):
     :return:
     """
     file_path = b''
-    if resource == '/'.encode('utf-8') or resource == '/index.html'.encode('utf-8'):
+    if resource == b'/' or resource == b'/index.html':
         file_path = './index.html'
-    elif resource == '/msoe.png'.encode('utf-8'):
+    elif resource == b'/msoe.png':
         file_path = './msoe.png'
-    elif resource == '/styles.css'.encode('utf-8'):
+    elif resource == b'/styles.css':
         file_path = './style.css'
 
     body = create_status_line(status_code)
