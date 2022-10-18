@@ -214,9 +214,17 @@ def send_response(resource, status_code, data_socket):
     :param status_code:
     :return:
     """
+    file_path = b''
+    if resource == '/'.encode('utf-8') or resource == '/index.html'.encode('utf-8'):
+        file_path = './index.html'
+    elif resource == '/msoe.png'.encode('utf-8'):
+        file_path = './msoe.png'
+    elif resource == '/styles.css'.encode('utf-8'):
+        file_path = './style.css'
+
     body = create_status_line(status_code)
-    body += create_header(resource)
-    body += convert_file_to_bytes(resource)
+    body += create_header(file_path)
+    body += convert_file_to_bytes(file_path)
     data_socket.sendAll(body)
     data_socket.close()
 
@@ -242,8 +250,8 @@ def create_status_line(status_code):
 
     # returns the http version, followed by a space, followed by the status code given, followed by a space,
     # finally followed by the reason phrase of the status code and a CRLF
-    return http_version + b'\x20' + status_code.to_bytes(1, 'big') + b'\x20' + reason_phrase.encode(
-        'utf-8') + b'\x0d\x0a'
+    return http_version + b'\x20' + status_code.to_bytes(status_code.bit_length(), 'big') \
+           + b'\x20' + reason_phrase.encode('utf-8') + b'\x0d\x0a'
 
 
 def get_mime_type(file_path):
@@ -276,8 +284,9 @@ def get_file_size(file_path):
     return file_size
 
 
-def create_header(resource):
-    return create_date() + get_mime_type(resource).to_bytes(2, 'big') + get_file_size(resource).to_bytes(2, 'big')
+def create_header(file_path):
+    return create_date() + get_mime_type(file_path).to_bytes(get_mime_type(file_path).bit_length(), 'big') \
+           + get_file_size(file_path).to_bytes(get_file_size(file_path).bit_length(), 'big')
 
 
 def create_date():
