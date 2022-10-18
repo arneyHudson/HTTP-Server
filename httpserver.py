@@ -265,7 +265,7 @@ def get_mime_type(file_path):
 
     mime_type_and_encoding = mimetypes.guess_type(file_path)
     mime_type = mime_type_and_encoding[0]
-    return mime_type
+    return mime_type.encode('utf-8')
 
 
 def get_file_size(file_path):
@@ -281,12 +281,11 @@ def get_file_size(file_path):
     file_size = None
     if os.path.isfile(file_path):
         file_size = os.stat(file_path).st_size
-    return file_size
+    return file_size.to_bytes(get_file_size(file_path).bit_length(), 'big')
 
 
 def create_header(file_path):
-    return create_date() + get_mime_type(file_path).to_bytes(get_mime_type(file_path).bit_length(), 'big') \
-           + get_file_size(file_path).to_bytes(get_file_size(file_path).bit_length(), 'big')
+    return create_date() + get_mime_type(file_path) + get_file_size(file_path)
 
 
 def create_date():
