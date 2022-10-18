@@ -82,10 +82,9 @@ def handle_request(request_socket):
     valid_version = check_version(header['version'])
     status_code = check_resource(header['resource'])
     if valid_version:
-        send_response(header['resource'], status_code, header['resource'], request_socket)
+        send_response(header['resource'], status_code, request_socket)
     else:
-        send_response(header['resource'], 400, header['resource'], request_socket)
-
+        send_response(header['resource'], 400, request_socket)
 
 
 pass  # Replace this line with your code
@@ -97,14 +96,12 @@ def check_version(version):
 
 def check_resource(header):
     resources = [b'/', b'/index.html', b'/msoe.png'
-                 b'/styles.css']
+                                       b'/styles.css']
     if header in resources:
         code = 200
     else:
         code = 404
     return code
-
-
 
 
 def parse_header(data_socket):
@@ -217,9 +214,10 @@ def send_response(resource, status_code, data_socket):
     :param status_code:
     :return:
     """
-    create_status_line(status_code)
-    create_header(resource)
-    convert_file_to_bytes(resource)
+    body = create_status_line(status_code)
+    body += create_header(resource)
+    body += convert_file_to_bytes(resource)
+    data_socket.sendAll(body)
     data_socket.close()
 
 
@@ -244,7 +242,8 @@ def create_status_line(status_code):
 
     # returns the http version, followed by a space, followed by the status code given, followed by a space,
     # finally followed by the reason phrase of the status code and a CRLF
-    return http_version + b'\x20' + status_code + b'\x20' + reason_phrase.encode('utf-8') + b'\x0d\x0a'
+    return http_version + b'\x20' + status_code.to_bytes(1, 'big') + b'\x20' + reason_phrase.encode(
+        'utf-8') + b'\x0d\x0a'
 
 
 def get_mime_type(file_path):
@@ -278,15 +277,13 @@ def get_file_size(file_path):
 
 
 def create_header(resource):
-    create_date()
-    get_mime_type(resource)
-    get_file_size(resource)
+    return create_date() + get_mime_type(resource).to_bytes(2, 'big') + get_file_size(resource).to_bytes(2, 'big')
 
 
 def create_date():
     timestamp = datetime.datetime.utcnow()
     timestring = timestamp.strftime('%a, %d %b %Y %H:%M:%S GMT')
-    return timestring
+    return timestring.encode('utf-8')
 
 
 def convert_file_to_bytes(file_path):
