@@ -91,6 +91,11 @@ pass  # Replace this line with your code
 
 
 def check_version(version):
+    """
+    Checks if the version is correct
+    :param version: the version being requested
+    :return: if the version is 1.1
+    """
     return version == b'HTTP/1.1'
 
 
@@ -226,13 +231,13 @@ def send_response(resource, status_code, data_socket):
 
     # creates the status line for the header
     header = create_status_line(status_code)
-    # adds the other elements of the header depending on what the type of file_path is
-    header += create_header(file_path)
-    # creates the body of the message depending on what the type of file_path is
-    body = convert_file_to_bytes(file_path)
-    print(header + body)
-    # sends the message data to the socket
-    data_socket.sendall(header + body)
+    if status_code != 200:
+        data_socket.sendall(header)
+    else:
+        header += create_header(file_path)
+        body = convert_file_to_bytes(file_path)
+        print(header+body)
+        data_socket.sendall(header + body)
     data_socket.close()
 
 
