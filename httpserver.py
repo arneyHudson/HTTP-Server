@@ -10,14 +10,19 @@
 An HTTP server
 
 Introduction: (Describe the lab in your own words):
-
-
+This lab creates an HTTP server using a TCP connection. It first has to send a response of bytes
+from web resources that are given.
 
 
 Summary: (Summarize your experience with the lab, what you learned, what you liked,what you disliked,
- and any suggestions you have for improvement):
-
-
+and any suggestions you have for improvement):
+This lab was very interesting because we got to learn how to read request headers, how to create response headers,
+and send the requested data through a body of bytes. The hardest part of this lab was debugging the response bytes and
+making sure we got every part of the response correct.
+Parsing the request header was the easier part of this lab, as we understood the contents of the
+header and understood what the different parts meant. This lab gave enough information for us to create it without other
+resources. Suggestions for the lab: We wished that the /styles.css in the lab description didn't have a typo because it
+caused us to have to look back at the code and wondering what was wrong.
 
 
 
