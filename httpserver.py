@@ -96,7 +96,7 @@ def check_version(version):
 
 def check_resource(header):
     resources = [b'/', b'/index.html', b'/msoe.png',
-                                       b'/styles.css']
+                 b'/styles.css']
     if header in resources:
         code = 200
     else:
@@ -208,12 +208,14 @@ def get_request_type(data_socket):
 
 def send_response(resource, status_code, data_socket):
     """
-
-    :param data_socket:
-    :param resource:
-    :param status_code:
-    :return:
+    Depending on the file type being passed which is determined by the resource type,
+    the header will be created
+    :param data_socket: The socket to where the data needs to be sent
+    :param resource: describes the file type
+    :param status_code: for the status line
+    :return: the sent data to the data_socket
     """
+    # depending on what the resource is it will create the associating file_path
     file_path = b''
     if resource == b'/' or resource == b'/index.html':
         file_path = './index.html'
@@ -222,10 +224,14 @@ def send_response(resource, status_code, data_socket):
     elif resource == b'/styles.css':
         file_path = './styles.css'
 
+    # creates the status line for the header
     header = create_status_line(status_code)
+    # adds the other elements of the header depending on what the type of file_path is
     header += create_header(file_path)
+    # creates the body of the message depending on what the type of file_path is
     body = convert_file_to_bytes(file_path)
-    print(header+body)
+    print(header + body)
+    # sends the message data to the socket
     data_socket.sendall(header + body)
     data_socket.close()
 
@@ -286,14 +292,26 @@ def get_file_size(file_path):
 
 
 def create_header(file_path):
+    """
+    The header that has all the required response types with everything in raw bytes
+    :param file_path: the file_path type which determines
+    :return: the header with the date followed by CRLF,
+    non-persistent connection type followed by CRLF,
+    content type from the mime type followed by CRLF,
+    and content length which ends with CRLF CRLF
+    """
     return create_date() + b'\x0d\x0a' + \
-        'Connection: close'.encode() + b'\x0d\x0a' +\
-        'Content-Type: '.encode() + get_mime_type(file_path).encode() + b'\x0d\x0a' +\
-        'Content-Length: '.encode() + get_file_size(file_path).to_bytes(2, 'big') \
-        + b'\x0d\x0a\x0d\x0a'
+           'Connection: close'.encode() + b'\x0d\x0a' + \
+           'Content-Type: '.encode() + get_mime_type(file_path).encode() + b'\x0d\x0a' + \
+           'Content-Length: '.encode() + get_file_size(file_path).to_bytes(2, 'big') \
+           + b'\x0d\x0a\x0d\x0a'
 
 
 def create_date():
+    """
+    helper method for the date that is required for the header
+    :return: the date in standard HTTP format
+    """
     timestamp = datetime.datetime.utcnow()
     timestring = timestamp.strftime('%a, %d %b %Y %H:%M:%S GMT')
     return 'Date: '.encode('utf-8') + timestring.encode('utf-8')
@@ -301,22 +319,17 @@ def create_date():
 
 def convert_file_to_bytes(file_path):
     """
-
-    :param file_path:
-    :param message:
-    :return:
+    Creates the bytes of the body of the message from the given file_path
+    :param file_path: string containing path to (resource) file
+    :return: the converted bytes from the resource
     """
 
+    # reads the file as a binary file
     with open(os.path.join(file_path), 'rb') as fobj:
         raw_bytes = fobj.read()
         print(raw_bytes)
     return raw_bytes
 
-    file = open(os.path.join(file_path), 'rb')
-    key_value = file.encode()
-    print(key_value)
-    key_value += b'\x0d\x0a'
-    return key_value
 
 main()
 
